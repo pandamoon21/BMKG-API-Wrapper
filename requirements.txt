@@ -1,0 +1,5 @@
+# bmkgaw — unofficial Info BMKG API wrapper
+# FastAPI + httpx, single file. Same stack verified in MDL-API-Wrapper.
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+httpx==0.28.1

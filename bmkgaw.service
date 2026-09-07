@@ -1,0 +1,18 @@
+[Unit]
+Description=bmkgaw API (Info BMKG wrapper)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/BMKG-API-Wrapper
+# Isi BMKGAW_TOKEN di .env (token TIDAK di-commit ke git)
+EnvironmentFile=/opt/BMKG-API-Wrapper/.env
+ExecStart=/opt/BMKG-API-Wrapper/.venv/bin/uvicorn bmkgaw:app --host 0.0.0.0 --port 8000 --workers 1
+Restart=always
+RestartSec=3
+User=www-data
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

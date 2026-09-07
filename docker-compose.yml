@@ -1,0 +1,29 @@
+# bmkgaw — Docker Compose (production-ish)
+# Usage:
+#   cp .env.example .env   # fill BMKGAW_TOKEN (optional; auto falls back to web)
+#   docker compose up -d
+#
+# BMKGAW_TOKEN is optional: with it, df/v1 + marine endpoints use the app API;
+# without it, source=auto falls back to the public open-data web API.
+services:
+  bmkgaw:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      BMKGAW_TOKEN: ${BMKGAW_TOKEN:-}
+      BMKGAW_AGENT: ${BMKGAW_AGENT:-infobmkg}
+      BMKGAW_CACHE_BACKEND: ${BMKGAW_CACHE_BACKEND:-memory}
+      BMKGAW_CACHE_DB_URL: ${BMKGAW_CACHE_DB_URL:-}
+    volumes:
+      - bmkgaw_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=4).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  bmkgaw_data:
