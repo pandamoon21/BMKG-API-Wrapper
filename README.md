@@ -89,8 +89,8 @@ Auth-gated endpoints (app df/v1 + marine) accept a `source` query param:
 
 | `source` | Behavior |
 |---|---|
-| `auto` (default) | token set → **app** (research API); no token → **web** (open data) |
-| `app` | force the research API (`api-apps.bmkg.go.id`) — no token → 400 |
+| `auto` (default) | token set → **app** (app API); no token → **web** (open data) |
+| `app` | force the app API (`api-apps.bmkg.go.id`) — no token → 400 |
 | `web` | force public open data — no token needed; 400 if the endpoint has no web equivalent |
 
 Only **forecast** has an official web equivalent
@@ -146,7 +146,7 @@ XML→JSON automatically.
 
 ### ⚠️ Errored / problematic endpoints (live validation, 2026-09-08)
 
-These routes are kept because the endpoints are real (from APK research), but
+These routes are kept because the endpoints are real (reverse-engineered from the Info BMKG Android app), but
 the **errors come from BMKG's servers**, not from wrapper bugs. The wrapper
 passes upstream status through with a clear message (no hang / internal 500).
 
@@ -292,7 +292,7 @@ return a clear upstream error rather than hanging or 500ing: `adm/search`
 (ignores `q`), `radar*` (403), `translate` (500), `warningcuaca/{loc}` (404),
 `radar.bmkg.go.id` & `mhews.id` (NXDOMAIN), `nowcasting.bmkg.go.id` (523).
 
-## Technical notes (from research)
+## Technical notes
 
 - **Two XML schemas for quakes:** `live30event.xml` is plain `<Infogempa>`;
   the CAP feeds (`last30*`, `warninggeof`) are `<alert>` CAP 1.2. Auto-detected.

@@ -89,8 +89,8 @@ Endpoint auth-gated (app df/v1 + marine) menerima parameter query `source`:
 
 | `source` | Perilaku |
 |---|---|
-| `auto` (default) | token ada → **app** (API riset); token kosong → **web** (open data) |
-| `app` | paksa API riset (`api-apps.bmkg.go.id`) — tanpa token → 400 |
+| `auto` (default) | token ada → **app** (API app); token kosong → **web** (open data) |
+| `app` | paksa API app (`api-apps.bmkg.go.id`) — tanpa token → 400 |
 | `web` | paksa open data publik — tanpa token; 400 jika endpoint tak punya padanan web |
 
 Hanya **forecast** yang punya padanan web resmi
@@ -145,7 +145,7 @@ XML→JSON otomatis.
 
 ### ⚠️ Endpoint bermasalah (hasil validasi live 2026-09-08)
 
-Route ini tetap ada karena endpoint-nya nyata (dari riset APK), tetapi
+Route ini tetap ada karena endpoint-nya nyata (hasil reverse-engineering APK Info BMKG), tetapi
 **error-nya berasal dari server BMKG**, bukan bug wrapper. Wrapper meneruskan
 status upstream apa adanya + pesan jelas (tanpa hang / 500 internal).
 
@@ -292,7 +292,7 @@ mengembalikan error jelas dari upstream, bukan hang/500: `adm/search`
 (404), `radar.bmkg.go.id` & `mhews.id` (NXDOMAIN), `nowcasting.bmkg.go.id`
 (523).
 
-## Catatan teknis (dari riset)
+## Catatan teknis
 
 - **Dua skema XML gempa:** `live30event.xml` = `<Infogempa>` polos; feed CAP
   (`last30*`, `warninggeof`) = `<alert>` CAP 1.2. Terdeteksi otomatis.

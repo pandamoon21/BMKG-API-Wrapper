@@ -92,7 +92,7 @@ def default_headers(auth: bool = False, host: str = "app") -> dict[str, str]:
 def resolve_source(source: str, has_web: bool = True) -> tuple[str, bool]:
     """Pick app vs web source for auth-gated endpoints.
 
-    source: 'app' = API research (needs token) · 'web' = official open data ·
+    source: 'app' = app API (reverse-engineered, needs token) · 'web' = official open data ·
             'auto' (default) = token present → app, else web.
     Returns (resolved_source, use_auth). Raises 400 when the caller forces a
     source that cannot be served (app without token / web without a public
@@ -387,7 +387,7 @@ app = FastAPI(
         "- [OpenAPI](/openapi.json) — machine-readable spec\n\n"
         "**Auth-gated endpoints** (df/v1 + marine) accept `?source=`:\n"
         "- `auto` (default): token present → app; no token → web open data\n"
-        "- `app`: force API research (needs `BMKGAW_TOKEN`)\n"
+        "- `app`: force app API (needs `BMKGAW_TOKEN`)\n"
         "- `web`: force official open data\n\n"
         "Not affiliated with BMKG. Data source attribution to BMKG is required "
         "by their open-data terms."
@@ -455,7 +455,7 @@ async def weather_forecast(adm4: str | None = None,
                            source: str = "auto") -> JSONResponse:
     """Hourly/daily forecast for an area (adm4, or lat+lon → reverse-geocoded).
 
-    source: 'app' (API research, needs token) | 'web' (official open data,
+    source: 'app' (app API, needs token) | 'web' (official open data,
     no token) | 'auto' (default: token → app, else web)."""
     src, auth = resolve_source(source, has_web=True)
     if src == "web":
