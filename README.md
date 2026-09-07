@@ -4,10 +4,10 @@
 
 An unofficial Python wrapper for **BMKG** (Badan Meteorologi, Klimatologi, dan
 Geofisika) data — weather, earthquakes/tsunami, marine, airports, air quality,
-and early warnings (nowcast). Same pattern as
-[MDL-API-Wrapper](https://github.com/pandamoon21/MDL-API-Wrapper) (`mdlaw`):
-a single FastAPI + httpx file, TTL cache, throttle, `/docs` Swagger, async
-library, CLI, and an offline self-check.
+and early warnings (nowcast). It exposes weather, earthquake/tsunami, marine,
+airport, air-quality, and warning data as a typed REST API, an async Python
+library, and a CLI — with a TTL cache, outbound throttling, Swagger `/docs`,
+and an offline self-check.
 
 - PyPI package: **`bmkgaw`**
 - Repo: **`BMKG-API-Wrapper`**
@@ -36,7 +36,7 @@ the public open-data web API.
 - **33 API routes** — meta, weather, airports, marine, environment, hazards, earthquakes, open data.
 - **Dual source + selection** (`?source=auto|app|web`) on auth-gated endpoints.
 - **Typed responses**: JSON passthrough, XML→JSON (Infogempa + CAP 1.2), binary/image passthrough.
-- **TTL cache** — in-memory or SQLite, with sha256 change detection (mdlaw-style).
+- **TTL cache** — in-memory or SQLite, with sha256 change detection.
 - **Global 1 req/s throttle** outbound — safely under BMKG's 60 req/min/IP.
 - **Async library** (`BMKG`) + **CLI** (`bmkgaw …`) + **offline self-check**.
 - **Deploy-ready**: Docker, Compose, Fly.io, Vercel, systemd.
@@ -250,7 +250,7 @@ python bmkgaw.py self                          # offline self-check
 ```
 
 After `pip install .` (or `pip install -e .`), the command becomes `bmkgaw`
-straight from your shell — just like `mdlaw`.
+straight from your shell — same as the module name.
 
 ## Cache
 
@@ -276,8 +276,8 @@ they're your protection from WAF and rate limits. Per-endpoint caching
 
 ## Error handling
 
-The wrapper surfaces upstream failures as clear HTTP errors (following mdlaw's
-`_upstream_error` pattern), not internal 500s:
+The wrapper surfaces upstream failures as clear HTTP errors, not internal
+500s:
 
 | Code | Meaning |
 |---|---|
@@ -357,20 +357,28 @@ sudo systemctl enable --now bmkgaw
 
 ## Project layout
 
+Single-file core by design — the whole service, library, and CLI live in
+`bmkgaw.py`; everything else is packaging, deployment, or tests.
+
 ```
-bmkgaw.py            # the whole wrapper: FastAPI app + BMKG client + CLI + self-check
-tests/test_bmkgaw.py # offline tests (pytest)
-api/index.py         # Vercel entrypoint
-Dockerfile           # docker
-docker-compose.yml   # compose + healthcheck
-fly.toml             # fly.io
-vercel.json          # vercel
-pytest.ini
-requirements.txt     # fastapi==0.141.1, uvicorn[standard]==0.52.4, httpx==0.28.1
-pyproject.toml       # PyPI: bmkgaw (console script)
-.env.example         # token placeholder (safe for public repos)
-.gitignore / .dockerignore
-CHANGELOG.md / LICENSE (MIT)
+bmkgaw.py              # core module: BMKG client, cache, throttling, 33 FastAPI routes, CLI
+tests/test_bmkgaw.py   # offline pytest suite (16 tests, no network)
+api/index.py           # Vercel serverless entrypoint (ASGI)
+Dockerfile             # container image (non-root + healthcheck)
+docker-compose.yml     # local/orchestrated run with healthcheck
+fly.toml               # Fly.io deployment config
+vercel.json            # Vercel deployment config
+bmkgaw.service         # systemd unit for VPS deployment
+requirements.txt       # runtime deps: fastapi, uvicorn[standard], httpx
+pyproject.toml         # PyPI metadata + console script (bmkgaw)
+pytest.ini             # pytest config
+.env.example           # env template — token placeholder (safe to commit)
+.dockerignore          # keeps .venv/.git out of the image
+.gitignore             # keeps .venv/.env/cache/artifacts out of git
+CHANGELOG.md           # Keep a Changelog
+LICENSE                # MIT
+README.md              # this file (English)
+README.id.md           # Indonesian translation
 ```
 
 ## Tests

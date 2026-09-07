@@ -8,8 +8,7 @@ follow [SemVer](https://semver.org/).
 
 ## [0.1.0] — 2026-09-08
 
-Initial release. Unofficial Info BMKG API wrapper, modelled after
-[`mdlaw` / MDL-API-Wrapper](https://github.com/pandamoon21/MDL-API-Wrapper).
+Initial release. Unofficial Info BMKG API wrapper.
 
 ### Added
 

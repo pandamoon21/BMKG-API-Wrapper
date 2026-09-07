@@ -4,10 +4,9 @@
 
 Pembungkus (wrapper) Python **tidak resmi** untuk data **BMKG** (Badan
 Meteorologi, Klimatologi, dan Geofisika) — cuaca, gempabumi/tsunami, maritim,
-bandara, kualitas udara, dan peringatan dini (nowcast). Pola yang sama dengan
-[MDL-API-Wrapper](https://github.com/pandamoon21/MDL-API-Wrapper) (`mdlaw`):
-satu file FastAPI + httpx, cache TTL, throttle, Swagger `/docs`, library
-async, CLI, dan self-check offline.
+bandara, kualitas udara, dan peringatan dini (nowcast). Menyajikan data BMKG
+sebagai REST API bertipe, library async Python, dan CLI — dengan cache TTL,
+throttle keluar, Swagger `/docs`, dan self-check offline.
 
 - Paket PyPI: **`bmkgaw`**
 - Repo: **`BMKG-API-Wrapper`**
@@ -36,7 +35,7 @@ web publik.
 - **33 route API** — meta, cuaca, bandara, maritim, lingkungan, bahaya, gempa, open data.
 - **Dua sumber + pemilihan** (`?source=auto|app|web`) di endpoint auth-gated.
 - **Respons diketik (typed)**: JSON langsung, XML→JSON (Infogempa + CAP 1.2), biner/gambar langsung.
-- **Cache TTL** — in-memory atau SQLite, dengan deteksi perubahan sha256 (ala mdlaw).
+- **Cache TTL** — in-memory atau SQLite, dengan deteksi perubahan sha256.
 - **Throttle global 1 req/detik** keluar — aman di bawah 60 req/menit/IP BMKG.
 - **Library async** (`BMKG`) + **CLI** (`bmkgaw …`) + **self-check offline**.
 - **Siap deploy**: Docker, Compose, Fly.io, Vercel, systemd.
@@ -249,7 +248,7 @@ python bmkgaw.py self                          # self-check offline
 ```
 
 Setelah `pip install .` (atau `pip install -e .`), perintahnya jadi `bmkgaw`
-langsung dari shell — sama seperti `mdlaw`.
+langsung dari shell — sama seperti nama modulnya.
 
 ## Cache
 
@@ -275,8 +274,7 @@ mengurangi request berulang.
 
 ## Penanganan error
 
-Wrapper meneruskan kegagalan upstream sebagai HTTP error yang jelas (mengikuti
-pola `_upstream_error` mdlaw), bukan 500 internal:
+Wrapper meneruskan kegagalan upstream sebagai HTTP error yang jelas, bukan 500 internal:
 
 | Kode | Arti |
 |---|---|
@@ -357,20 +355,28 @@ sudo systemctl enable --now bmkgaw
 
 ## Struktur proyek
 
+Inti satu file — seluruh service, library, dan CLI ada di `bmkgaw.py`; sisanya
+packaging, deployment, atau tes.
+
 ```
-bmkgaw.py            # seluruh wrapper: FastAPI app + BMKG client + CLI + self-check
-tests/test_bmkgaw.py # tes offline (pytest)
-api/index.py         # entrypoint Vercel
-Dockerfile           # docker
-docker-compose.yml   # compose + healthcheck
-fly.toml             # fly.io
-vercel.json          # vercel
-pytest.ini
-requirements.txt     # fastapi==0.141.1, uvicorn[standard]==0.52.4, httpx==0.28.1
-pyproject.toml       # PyPI: bmkgaw (console script)
-.env.example         # placeholder token (aman untuk repo publik)
-.gitignore / .dockerignore
-CHANGELOG.md / LICENSE (MIT)
+bmkgaw.py              # modul inti: client BMKG, cache, throttle, 33 route FastAPI, CLI
+tests/test_bmkgaw.py   # tes offline pytest (16 tes, tanpa jaringan)
+api/index.py           # entrypoint serverless Vercel (ASGI)
+Dockerfile             # image container (non-root + healthcheck)
+docker-compose.yml     # run lokal/orchestrasi dengan healthcheck
+fly.toml               # konfigurasi deploy Fly.io
+vercel.json            # konfigurasi deploy Vercel
+bmkgaw.service         # unit systemd untuk deploy VPS
+requirements.txt       # dependensi runtime: fastapi, uvicorn[standard], httpx
+pyproject.toml         # metadata PyPI + console script (bmkgaw)
+pytest.ini             # konfigurasi pytest
+.env.example           # template env — placeholder token (aman di-commit)
+.dockerignore          # menjaga .venv/.git tidak masuk image
+.gitignore             # menjaga .venv/.env/cache/artefak tidak masuk git
+CHANGELOG.md           # Keep a Changelog
+LICENSE                # MIT
+README.md              # dokumentasi utama (Inggris)
+README.id.md           # terjemahan Indonesia
 ```
 
 ## Tes

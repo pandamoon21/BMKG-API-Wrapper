@@ -44,8 +44,8 @@ from fastapi.responses import JSONResponse, Response
 TOKEN = os.environ.get("BMKGAW_TOKEN", "").strip()
 AGENT = os.environ.get("BMKGAW_AGENT", "infobmkg").strip() or "infobmkg"
 # Cache backend: memory (default) or sqlite.  ponytail: sqlite only — mysql/
-# postgres backends exist in mdlaw but are YAGNI for a private wrapper; add the
-# same SQLCache flavour switch if you need multi-instance shared cache.
+# postgres backends are YAGNI for this wrapper; add the same SQLCache flavour
+# switch if you need multi-instance shared cache.
 CACHE_BACKEND = os.environ.get("BMKGAW_CACHE_BACKEND", "memory").strip().lower()
 CACHE_DB_URL = os.environ.get("BMKGAW_CACHE_DB_URL", "").strip() or "sqlite:///bmkgaw_cache.db"
 
@@ -175,8 +175,8 @@ class TTLCache(CacheBackend):
 
 
 class SQLCache(CacheBackend):
-    """Persistent sqlite cache (stdlib). Same change-detection idea as mdlaw:
-    stores a sha256 of the value and flags changed=1 when a TTL-refetch differs."""
+    """Persistent sqlite cache (stdlib). Stores a sha256 of the value and
+    flags changed=1 when a TTL-refetch differs."""
 
     def __init__(self, url: str) -> None:
         path = url[len("sqlite:///"):] or ":memory:"
