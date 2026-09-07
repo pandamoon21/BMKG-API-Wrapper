@@ -1,44 +1,46 @@
 # bmkgaw — Info BMKG API wrapper
 
-Unofficial Python wrapper for **BMKG** (Badan Meteorologi, Klimatologi, dan
-Geofisika) data — cuaca, gempabumi/tsunami, maritim, bandara, kualitas udara,
-peringatan dini (nowcast). Pola sama dengan
-[MDL-API-Wrapper](https://github.com/pandamoon21/MDL-API-Wrapper) (`mdlaw`):
-satu file FastAPI + httpx, cache TTL, throttle, `/docs` Swagger, library
-async, CLI, dan self-check offline.
+**English** · [Bahasa Indonesia](README.id.md)
 
-- Paket PyPI: **`bmkgaw`**
+An unofficial Python wrapper for **BMKG** (Badan Meteorologi, Klimatologi, dan
+Geofisika) data — weather, earthquakes/tsunami, marine, airports, air quality,
+and early warnings (nowcast). Same pattern as
+[MDL-API-Wrapper](https://github.com/pandamoon21/MDL-API-Wrapper) (`mdlaw`):
+a single FastAPI + httpx file, TTL cache, throttle, `/docs` Swagger, async
+library, CLI, and an offline self-check.
+
+- PyPI package: **`bmkgaw`**
 - Repo: **`BMKG-API-Wrapper`**
 
 ## Data sources
 
-| # | Sumber | Host | Auth | Rate limit |
+| # | Source | Host | Auth | Rate limit |
 |---|--------|------|------|-----------|
 | 1 | **App API** Info BMKG Android v3.5.1 (`com.Info_BMKG`) | `api-apps.bmkg.go.id` | token (`df/v1`, marine) | — |
-| 2 | **Open data** prakiraan cuaca resmi | `api.bmkg.go.id/publik/prakiraan-cuaca` | — | 60 req/menit/IP |
-| 3 | **Open data** gempabumi & tsunami (TEWS) | `data.bmkg.go.id/DataMKG/TEWS/*` | — | 60 req/menit/IP |
-| 4 | **Open data** peringatan dini CAP/nowcast | `www.bmkg.go.id/alerts/nowcast/{id\|en}` | — | 60 req/menit/IP |
-| 5 | Feed InaTEWS GCS (`live30event.xml`, CAP) | GCS feed host | — | — |
+| 2 | **Open data** official weather forecast | `api.bmkg.go.id/publik/prakiraan-cuaca` | — | 60 req/min/IP |
+| 3 | **Open data** earthquakes & tsunami (TEWS) | `data.bmkg.go.id/DataMKG/TEWS/*` | — | 60 req/min/IP |
+| 4 | **Open data** CAP/nowcast warnings | `www.bmkg.go.id/alerts/nowcast/{id\|en}` | — | 60 req/min/IP |
+| 5 | InaTEWS GCS feeds (`live30event.xml`, CAP) | GCS feed host | — | — |
 
-Endpoint `df/v1/*` + maritim (sumber #1) butuh token statis `API_LOCK` yang
-dikirim app. Token **tidak di-commit** — set `BMKGAW_TOKEN` via env (lihat
-`.env.example`). Tanpa token, `source=auto` tetap jalan ke open data web.
+The `df/v1/*` + marine endpoints (source #1) need the static `API_LOCK` token
+the app ships. The token is **not committed** — set `BMKGAW_TOKEN` in the
+environment (see `.env.example`). Without a token, `source=auto` falls back to
+the public open-data web API.
 
-> **Atribusi:** wajib mencantumkan BMKG sebagai sumber data (syarat portal
-> terbuka resmi). Proyek ini **tidak berafiliasi dengan BMKG**; data mentah
-> milik BMKG, kode wrapper ini MIT.
+> **Attribution:** BMKG must be credited as the data source (required by their
+> open-data terms). This project is **not affiliated with BMKG**; the raw data
+> belongs to BMKG, the wrapper code is MIT.
 
-## Fitur
+## Features
 
-- **33 route API** — meta, cuaca, bandara, maritim, lingkungan, bahaya, gempa, open data.
-- **Sumber ganda + pemilihan** (`?source=auto|app|web`) untuk endpoint auth-gated.
-- **Respons heterogen di-parse typed**: JSON passthrough, XML→JSON
-  (Infogempa + CAP 1.2), binary/image passthrough.
-- **Cache TTL** memory atau SQLite + deteksi perubahan (sha256) ala mdlaw.
-- **Throttle global 1 req/detik** outbound → aman di bawah 60 req/menit/IP.
-- **Library async** (`BMKG`) + **CLI** (`bmkgaw …`) + **self-check offline**.
-- **Deploy siap pakai**: Docker, Compose, Fly.io, Vercel, systemd.
-- **Dokumentasi interaktif**: Swagger UI `/docs`, ReDoc `/redoc`, OpenAPI `/openapi.json`.
+- **33 API routes** — meta, weather, airports, marine, environment, hazards, earthquakes, open data.
+- **Dual source + selection** (`?source=auto|app|web`) on auth-gated endpoints.
+- **Typed responses**: JSON passthrough, XML→JSON (Infogempa + CAP 1.2), binary/image passthrough.
+- **TTL cache** — in-memory or SQLite, with sha256 change detection (mdlaw-style).
+- **Global 1 req/s throttle** outbound — safely under BMKG's 60 req/min/IP.
+- **Async library** (`BMKG`) + **CLI** (`bmkgaw …`) + **offline self-check**.
+- **Deploy-ready**: Docker, Compose, Fly.io, Vercel, systemd.
+- **Interactive docs**: Swagger UI `/docs`, ReDoc `/redoc`, OpenAPI `/openapi.json`.
 
 ## Quick start
 
@@ -46,9 +48,9 @@ dikirim app. Token **tidak di-commit** — set `BMKGAW_TOKEN` via env (lihat
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
 
-# token untuk endpoint df/v1 + marine (dari .env APK Info BMKG).
-# TANPA token pun tetap jalan: source=auto otomatis pakai web open-data.
-# export BMKGAW_TOKEN='Bearer …'    # placeholder — jangan commit token asli
+# Token for df/v1 + marine endpoints (from the Info BMKG APK's .env).
+# Optional — without it, source=auto falls back to the web open-data API.
+# export BMKGAW_TOKEN='Bearer …'
 
 uvicorn bmkgaw:app --port 8000
 # → http://localhost:8000/docs
@@ -62,103 +64,105 @@ curl http://localhost:8000/api/v1/earthquake/latest
 curl "http://localhost:8000/api/v1/weather/forecast?adm4=31.71.03.1001&source=web"
 
 python bmkgaw.py self        # offline self-check
-python -m pytest tests/ -q   # tes offline
+python -m pytest tests/ -q   # offline tests
 ```
 
 ## Environment
 
-| Var | Perlu | Default | Keterangan |
+| Var | Needed | Default | Notes |
 |---|---|---|---|
-| `BMKGAW_TOKEN` | endpoint app `df/v1` + marine | — (kosong) | tanpa ini `auto` → web; isi dari `API_LOCK` APK |
-| `BMKGAW_AGENT` | tidak | `infobmkg` | nama agent app (header `AGENT`) |
-| `BMKGAW_CACHE_BACKEND` | tidak | `memory` | `memory` atau `sqlite` |
-| `BMKGAW_CACHE_DB_URL` | jika `sqlite` | `sqlite:///bmkgaw_cache.db` | lokasi db |
+| `BMKGAW_TOKEN` | app `df/v1` + marine endpoints | — (empty) | without it `auto` → web; fill from the APK's `API_LOCK` |
+| `BMKGAW_AGENT` | no | `infobmkg` | agent name sent to the app API (`AGENT` header) |
+| `BMKGAW_CACHE_BACKEND` | no | `memory` | `memory` or `sqlite` |
+| `BMKGAW_CACHE_DB_URL` | if `sqlite` | `sqlite:///bmkgaw_cache.db` | database location |
 
-Token (`API_LOCK`) adalah kredensial **statis yang dikirim app** — shared
-client credential, bukan rahasia per-user. Route auth mengirimnya via header
-`Authorization` (atau `x-api-key-infobmkg` / `x-api-key` / `apikey` — semua
-diterima server). Token **tidak di-commit** — isi `BMKGAW_TOKEN` di env lokal
-(dari `API_LOCK` di APK Info BMKG) kalau mau pakai endpoint app df/v1 + marine.
+The token (`API_LOCK`) is a **static shared credential** the app sends — a
+client credential, not a per-user secret. Auth routes send it via the
+`Authorization` header (or `x-api-key-infobmkg` / `x-api-key` / `apikey` — the
+server accepts all of them). The token is **never committed**; set
+`BMKGAW_TOKEN` in your local env (from the `API_LOCK` line in the Info BMKG
+APK) if you want the app df/v1 + marine endpoints.
 
-## Pilih sumber data (`?source=`)
+## Source selection (`?source=`)
 
-Endpoint auth-gated (app df/v1 + marine) menerima param query `source`:
+Auth-gated endpoints (app df/v1 + marine) accept a `source` query param:
 
-| `source` | Perilaku |
+| `source` | Behavior |
 |---|---|
-| `auto` (default) | token ada → **app** (API riset); token kosong → **web** (open data) |
-| `app` | paksa API riset (`api-apps.bmkg.go.id`) — tanpa token → 400 |
-| `web` | paksa open data publik — tanpa token; 400 jika endpoint tak punya padanan web |
+| `auto` (default) | token set → **app** (research API); no token → **web** (open data) |
+| `app` | force the research API (`api-apps.bmkg.go.id`) — no token → 400 |
+| `web` | force public open data — no token needed; 400 if the endpoint has no web equivalent |
 
-Hanya **forecast** yang punya padanan web resmi
-(`/publik/prakiraan-cuaca?adm4=…`, live-verified). Endpoint tanpa padanan web
-(`present`, `area/search`, `area/coord`, `marine forecast`) → `source=web`
-ditolak 400, dan `auto` tanpa token → 400 minta token.
+Only **forecast** has an official web equivalent
+(`/publik/prakiraan-cuaca?adm4=…`, live-verified). Endpoints without a web
+equivalent (`present`, `area/search`, `area/coord`, `marine forecast`) →
+`source=web` is rejected with 400, and `auto` without a token → 400 asking for
+a token.
 
 ```bash
-# tanpa token: auto → web (open data)
+# no token: auto → web (open data)
 curl "http://localhost:8000/api/v1/weather/forecast?adm4=31.71.03.1001"
-# paksa app (butuh BMKGAW_TOKEN)
+# force app (needs BMKGAW_TOKEN)
 curl "http://localhost:8000/api/v1/weather/forecast?adm4=31.71.03.1001&source=app"
-# paksa web
+# force web
 curl "http://localhost:8000/api/v1/weather/forecast?adm4=31.71.03.1001&source=web"
 ```
 
 ## Endpoints (`/api/v1`)
 
-| Route | Sumber | Token | TTL | Catatan |
+| Route | Source | Token | TTL | Notes |
 |---|---|---|---|---|
 | `GET /health` | — | — | — | liveness |
 | `GET /cache/stats` · `GET /dashboard` | — | — | — | cache + info |
-| `GET /weather/forecast?adm4=…` atau `?lat=&lon=` | app **atau** web | ✅/— dinamis | 300 | prakiraan; `source` |
-| `GET /weather/present?adm4=…` | app | ✅ | 120 | cuaca saat ini (no web) |
-| `GET /weather/legacy?lat=&lon=` | app | — | 300 | ⚠️ deprecated (cuaca kosong) |
-| `GET /area/search?q=` | app | ✅ | 60 | ⚠️ search rusak server (ignore `q`) |
+| `GET /weather/forecast?adm4=…` or `?lat=&lon=` | app **or** web | ✅/— dynamic | 300 | forecast; `source` |
+| `GET /weather/present?adm4=…` | app | ✅ | 120 | current weather (no web) |
+| `GET /weather/legacy?lat=&lon=` | app | — | 300 | ⚠️ deprecated (empty payload) |
+| `GET /area/search?q=` | app | ✅ | 60 | ⚠️ server ignores `q` |
 | `GET /area/coord?lat=&lon=` | app | ✅ | 86400 | reverse geocode → adm1–adm4 |
-| `GET /airports` | app | — | 300 | semua stasiun bandara (111) |
-| `GET /airports/{icao}` | app | — | 300 | detail 1 bandara (METAR/TAF) |
+| `GET /airports` | app | — | 300 | all airport stations (111) |
+| `GET /airports/{icao}` | app | — | 300 | 1 airport detail (METAR/TAF) |
 | `GET /marine/forecast` | app | ✅ | 1800 | raw ~1.5 MB (`fct_code` codec) |
-| `GET /marine/waves` | app | — | 1800 | kategori gelombang per area |
+| `GET /marine/waves` | app | — | 1800 | wave categories per area |
 | `GET /air-quality` | app | — | 600 | PM2.5 |
 | `GET /satellite` · `GET /satellite/image/{file}` | app | — | 120/600 | Himawari-8 |
-| `GET /cb?lat=&lon=` | app | — | 3600 | prakiraan awan CB |
-| `GET /warnings` · `GET /warnings/{lokasi}` | app | — | 120 | peringatan dini (404 = tidak ada) |
-| `GET /press` | app | — | 3600 | siaran pers |
+| `GET /cb?lat=&lon=` | app | — | 3600 | CB cloud forecast |
+| `GET /warnings` · `GET /warnings/{location}` | app | — | 120 | warnings (404 = none) |
+| `GET /press` | app | — | 3600 | press releases |
 | `GET /radar` · `GET /radar/image` | app | — | 300 | ⚠️ 403 server-side (2026-09-03) |
-| `GET /earthquake/latest` | tews | — | 60 | gempa terbaru (resmi) |
-| `GET /earthquake/recent` | tews | — | 120 | 15 gempa M≥5 |
-| `GET /earthquake/felt` | tews | — | 120 | 15 gempa terasa |
-| `GET /earthquake/shakemap/{file}` | tews | — | 86400 | gambar shakemap (bytes) |
-| `GET /earthquake/live` | gcs | — | 60 | buffer ~3 hari (XML→JSON) |
+| `GET /earthquake/latest` | tews | — | 60 | latest quake (official) |
+| `GET /earthquake/recent` | tews | — | 120 | 15 quakes M≥5 |
+| `GET /earthquake/felt` | tews | — | 120 | 15 felt quakes |
+| `GET /earthquake/shakemap/{file}` | tews | — | 86400 | shakemap image (bytes) |
+| `GET /earthquake/live` | gcs | — | 60 | ~3-day buffer (XML→JSON) |
 | `GET /earthquake/last30[/felt\|/tsunami]` | gcs | — | 120 | CAP 1.2 → JSON |
-| `GET /earthquake/warning` | gcs | — | 60 | warning geo/tsunami aktif |
-| `GET /publik/weather?adm4=…` | publik | — | 300 | prakiraan resmi open-data |
-| `GET /nowcast/{id\|en}` | web | — | 60 | RSS peringatan dini provinsi |
-| `GET /nowcast/{id\|en}/{kode}` | web | — | 300 | detail CAP per kecamatan |
+| `GET /earthquake/warning` | gcs | — | 60 | active geo/tsunami warning |
+| `GET /publik/weather?adm4=…` | publik | — | 300 | official open-data forecast |
+| `GET /nowcast/{id\|en}` | web | — | 60 | provincial warning RSS |
+| `GET /nowcast/{id\|en}/{code}` | web | — | 300 | per-district CAP detail |
 
 `tews` = `data.bmkg.go.id/DataMKG/TEWS`, `gcs` = GCS InaTEWS, `publik` =
-`api.bmkg.go.id`, `web` = `www.bmkg.go.id`. Feed GCS + nowcast di-parse
-XML→JSON otomatis.
+`api.bmkg.go.id`, `web` = `www.bmkg.go.id`. GCS + nowcast feeds are parsed
+XML→JSON automatically.
 
-### ⚠️ Endpoint yang error / bermasalah (hasil validasi live 2026-09-08)
+### ⚠️ Errored / problematic endpoints (live validation, 2026-09-08)
 
-Sebagian route tetap terdaftar karena endpoint-nya nyata dari riset APK, tapi
-**error-nya berasal dari server BMKG**, bukan bug wrapper. Wrapper mengembalikan
-status upstream apa adanya + pesan jelas (bukan hang/500 internal).
+These routes are kept because the endpoints are real (from APK research), but
+the **errors come from BMKG's servers**, not from wrapper bugs. The wrapper
+passes upstream status through with a clear message (no hang / internal 500).
 
-| Route | Status (live) | Arti / penyebab |
+| Route | Status (live) | Meaning / cause |
 |---|---|---|
-| `GET /weather/legacy?lat=&lon=` | `200` tapi `[]` | deprecated — server kembalikan daftar kosong |
-| `GET /area/search?q=` | `200` tapi statis | bug server: `q` diabaikan, selalu daftar Kemayoran — pakai `/area/coord` |
-| `GET /warnings/{lokasi}` | `404` | **normal** — tidak ada peringatan aktif untuk kode itu; cek `/warnings` dulu untuk daftar `ID_Kode` valid |
-| `GET /radar` · `GET /radar/image` | `403` | nonaktif server-side BMKG (sejak 2026-09-03) — `radar*` di-`Forbidden`; coba `?lat=&lon=` / `?radar=` tetap 403 |
-| `GET /earthquake/warning` | `200` (bisa kosong) | kosong = tidak ada warning geo/tsunami aktif (valid) |
+| `GET /weather/legacy?lat=&lon=` | `200` but `[]` | deprecated — server returns an empty list |
+| `GET /area/search?q=` | `200` but static | server bug: `q` ignored, always returns the Kemayoran list — use `/area/coord` |
+| `GET /warnings/{location}` | `404` | **normal** — no active warning for that code; check `/warnings` for valid `ID_Kode`s first |
+| `GET /radar` · `GET /radar/image` | `403` | disabled server-side by BMKG (since 2026-09-03) — `radar*` is `Forbidden`; `?lat=&lon=` / `?radar=` still 403 |
+| `GET /earthquake/warning` | `200` (may be empty) | empty = no active geo/tsunami warning (valid) |
 
-Tambahan (upstream, bukan route wrapper): `translate` → `500`,
+Additional (upstream, not wrapper routes): `translate` → `500`,
 `warningcuaca/{loc}` app → `404`, `radar.bmkg.go.id` & `mhews.id` → NXDOMAIN,
 `nowcasting.bmkg.go.id` → `523`.
 
-### Contoh respons (live-captured)
+### Example responses (live-captured)
 
 `GET /api/v1/earthquake/latest`:
 
@@ -179,7 +183,7 @@ Tambahan (upstream, bukan route wrapper): `translate` → `500`,
 }
 ```
 
-`GET /api/v1/publik/weather?adm4=31.71.03.1001` (open data, tanpa token):
+`GET /api/v1/publik/weather?adm4=31.71.03.1001` (open data, no token):
 
 ```json
 {
@@ -193,6 +197,9 @@ Tambahan (upstream, bukan route wrapper): `translate` → `500`,
 }
 ```
 
+Note: field names in responses are Indonesian because they come straight from
+BMKG's own APIs — that's upstream data, kept as-is.
+
 ## Library (async)
 
 ```python
@@ -200,12 +207,12 @@ import asyncio, json
 from bmkgaw import BMKG
 
 async def main():
-    b = BMKG()                          # baca BMKGAW_TOKEN dari env (opsional)
-    g  = await b.quake_latest()         # gempa terbaru (TEWS, tanpa token)
-    f  = await b.forecast(adm4="31.71.03.1001")                 # auto: token→app, tanpa→web
-    fw = await b.forecast(adm4="31.71.03.1001", source="web")   # paksa open data
-    p  = await b.present(adm4="31.71.03.1001")                  # butuh token
-    pw = await b.publik_weather(adm4="31.71.03.1001")           # open data resmi
+    b = BMKG()                          # reads BMKGAW_TOKEN from env (optional)
+    g  = await b.quake_latest()         # latest quake (TEWS, no token)
+    f  = await b.forecast(adm4="31.71.03.1001")                 # auto: token→app, none→web
+    fw = await b.forecast(adm4="31.71.03.1001", source="web")   # force open data
+    p  = await b.present(adm4="31.71.03.1001")                  # needs token
+    pw = await b.publik_weather(adm4="31.71.03.1001")           # official open data
     n  = await b.nowcast("id")          # XML→JSON
     print(json.dumps(g, ensure_ascii=False)[:300])
     print("cache:", b.stats())
@@ -214,9 +221,9 @@ async def main():
 asyncio.run(main())
 ```
 
-Metode `BMKG`:
+`BMKG` methods:
 
-| Metode | Route | Token |
+| Method | Route | Token |
 |---|---|---|
 | `forecast(adm4=…|lat=,lon=…, source=)` | `/weather/forecast` | ✅/— |
 | `present(adm4, source=)` | `/weather/present` | ✅ |
@@ -235,64 +242,64 @@ Metode `BMKG`:
 
 ```bash
 python bmkgaw.py health
-python bmkgaw.py weather 31.71.03.1001        # atau 'lat,lon'; + --source app|web|auto
+python bmkgaw.py weather 31.71.03.1001        # or 'lat,lon'; + --source app|web|auto
 python bmkgaw.py quake-latest | quake-recent | quake-live
 python bmkgaw.py nowcast id
 python bmkgaw.py airports
-python bmkgaw.py self                          # self-check offline
+python bmkgaw.py self                          # offline self-check
 ```
 
-Setelah `pip install .` (atau `pip install -e .`), perintahnya jadi `bmkgaw`
-langsung dari shell — sama seperti `mdlaw`.
+After `pip install .` (or `pip install -e .`), the command becomes `bmkgaw`
+straight from your shell — just like `mdlaw`.
 
 ## Cache
 
-- **`memory`** (default): dict TTL dalam proses.
-- **`sqlite`**: persisten lintas-restart, cocok untuk server.
+- **`memory`** (default): in-process TTL dict.
+- **`sqlite`**: persistent across restarts, good for servers.
 
 ```bash
 export BMKGAW_CACHE_BACKEND=sqlite
 export BMKGAW_CACHE_DB_URL=sqlite:////data/bmkgaw_cache.db
 ```
 
-Setiap entri menyimpan `sha256` isi respons; saat TTL kedaluwarsa lalu konten
-berubah, flag `changed=1` (untuk polling perubahan, mis. gempa / feed
-peringatan dini). Inspeksi: `curl :8000/api/v1/cache/stats`.
+Each entry stores a `sha256` of the response body; when a TTL expires and the
+content changed, the entry gets `changed=1` (handy for polling — e.g.
+earthquakes / warning feeds). Inspect: `curl :8000/api/v1/cache/stats`.
 
 ## Rate limit & throttle
 
-BMKG open-data membatasi **60 req/menit/IP**. Wrapper memakai throttle global
-**1 req/detik** outbound (shared `asyncio.Lock` di seluruh host + route),
-jadi pemakaian normal jauh di bawah batas. **Jangan hapus throttle/cache** —
-itu pelindung dari WAF & rate limit. Cache per-endpoint (TTL 60–86400 dtk)
-mengurangi request berulang.
+BMKG open data allows **60 req/min/IP**. The wrapper uses a global **1 req/s**
+outbound throttle (a shared `asyncio.Lock` across all hosts and routes), so
+normal usage stays far below the limit. **Don't remove the throttle/cache** —
+they're your protection from WAF and rate limits. Per-endpoint caching
+(TTL 60–86400 s) cuts down repeated requests.
 
 ## Error handling
 
-Wrapper meneruskan kegagalan upstream sebagai HTTP error yang jelas
-(mengikuti pola `_upstream_error` mdlaw), bukan 500 internal:
+The wrapper surfaces upstream failures as clear HTTP errors (following mdlaw's
+`_upstream_error` pattern), not internal 500s:
 
-| Kode | Arti |
+| Code | Meaning |
 |---|---|
-| `400` | param salah / `source` tak valid / butuh token |
-| `401`/`403` | token salah / diblokir WAF (cek UA + Referer) |
-| `404` | tidak ada data (`/warnings/{lokasi}`, `warningcuaca/{loc}`) |
-| `429` | kena rate limit — throttle mencegah ini |
-| `501`/`502` | endpoint upstream mati/deprecated server-side |
+| `400` | bad param / invalid `source` / token required |
+| `401`/`403` | bad token / blocked by WAF (check UA + Referer) |
+| `404` | no data (`/warnings/{location}`, `warningcuaca/{loc}`) |
+| `429` | rate limited — the throttle prevents this |
+| `501`/`502` | upstream endpoint dead/deprecated server-side |
 
-Endpoint yang **mati server-side (2026-09-03)** tetap terdaftar tapi
-mengembalikan error jelas dari upstream, bukan hang/500: `adm/search`
-(ignore `q`), `radar*` (403), `translate` (500), `warningcuaca/{loc}` (404),
+Endpoints that are **dead server-side (2026-09-03)** stay registered but
+return a clear upstream error rather than hanging or 500ing: `adm/search`
+(ignores `q`), `radar*` (403), `translate` (500), `warningcuaca/{loc}` (404),
 `radar.bmkg.go.id` & `mhews.id` (NXDOMAIN), `nowcasting.bmkg.go.id` (523).
 
-## Catatan teknis (dari riset)
+## Technical notes (from research)
 
-- **XML dua schema gempa:** `live30event.xml` = `<Infogempa>` polos; feed CAP
-  (`last30*`, `warninggeof`) = `<alert>` CAP 1.2. Dikenali otomatis.
-- **`data.bmkg.go.id` butuh browser UA + `Referer`** (WAF) — sudah di-set.
-- **Ikon cuaca bisa mengandung spasi** (`berawan tebal-am.svg`) → URL-encode.
-- Marine `forecast-raw` memakai codec `fct_code` (algoritme decode tidak
-  terdokumentasi) → v1 mem-proxy raw; decode menyusul.
+- **Two XML schemas for quakes:** `live30event.xml` is plain `<Infogempa>`;
+  the CAP feeds (`last30*`, `warninggeof`) are `<alert>` CAP 1.2. Auto-detected.
+- **`data.bmkg.go.id` needs a browser UA + `Referer`** (WAF) — already set.
+- **Weather icons can contain spaces** (`berawan tebal-am.svg`) → URL-encoded.
+- Marine `forecast-raw` uses the `fct_code` compact codec (decode algorithm
+  undocumented) → v1 proxies raw; decoding comes later.
 
 ## Deploy
 
@@ -306,22 +313,22 @@ docker run --rm -p 8000:8000 -e BMKGAW_TOKEN='Bearer …' bmkgaw
 ### Docker Compose
 
 ```bash
-cp .env.example .env     # isi BMKGAW_TOKEN (opsional)
-docker compose up -d     # healthcheck bawaan
+cp .env.example .env     # fill BMKGAW_TOKEN (optional)
+docker compose up -d     # built-in healthcheck
 ```
 
 ### Fly.io
 
 ```bash
 fly launch --no-deploy
-# uncomment [mounts] + set sqlite di fly.toml untuk cache persisten
+# uncomment [mounts] + set sqlite in fly.toml for persistent cache
 fly deploy
 ```
 
 ### Vercel
 
 ```bash
-vercel deploy            # pakai vercel.json + api/index.py (ASGI)
+vercel deploy            # uses vercel.json + api/index.py (ASGI)
 ```
 
 ### systemd (VPS)
@@ -351,9 +358,9 @@ sudo systemctl enable --now bmkgaw
 ## Project layout
 
 ```
-bmkgaw.py            # seluruh wrapper: FastAPI app + BMKG client + CLI + self-check
-tests/test_bmkgaw.py # tes offline (pytest)
-api/index.py         # entrypoint Vercel
+bmkgaw.py            # the whole wrapper: FastAPI app + BMKG client + CLI + self-check
+tests/test_bmkgaw.py # offline tests (pytest)
+api/index.py         # Vercel entrypoint
 Dockerfile           # docker
 docker-compose.yml   # compose + healthcheck
 fly.toml             # fly.io
@@ -361,28 +368,28 @@ vercel.json          # vercel
 pytest.ini
 requirements.txt     # fastapi==0.141.1, uvicorn[standard]==0.52.4, httpx==0.28.1
 pyproject.toml       # PyPI: bmkgaw (console script)
-.env.example         # token placeholder (aman untuk publik)
+.env.example         # token placeholder (safe for public repos)
 .gitignore / .dockerignore
 CHANGELOG.md / LICENSE (MIT)
 ```
 
-## Tes
+## Tests
 
 ```bash
 pip install pytest        # dev-only
 python -m pytest tests/ -q
-python bmkgaw.py self     # self-check offline tanpa pytest
+python bmkgaw.py self     # offline self-check, no pytest needed
 ```
 
-## Keamanan
+## Security
 
-- Token **tidak di-commit**. `.env.example` hanya placeholder; isi `BMKGAW_TOKEN`
-  via env / file `.env` lokal (di-`.gitignore`).
-- Header auth dikirim **hanya** ke host `api-apps.bmkg.go.id` (app API) — tidak
-  pernah ke host open-data.
-- Non-root user di Docker; healthcheck bawaan.
+- The token is **never committed**. `.env.example` only carries a placeholder;
+  set `BMKGAW_TOKEN` via env or a local `.env` file (git-ignored).
+- Auth headers are sent **only** to `api-apps.bmkg.go.id` (app API) — never to
+  open-data hosts.
+- Non-root user in Docker; built-in healthcheck.
 
 ## Disclaimer
 
-Data © BMKG. Wrapper ini tidak berafiliasi dengan BMKG dan tidak resmi.
-Gunakan sesuai syarat portal terbuka resmi BMKG; sertakan atribusi BMKG.
+Data © BMKG. This wrapper is not affiliated with or endorsed by BMKG. Use it
+in line with BMKG's official open-data terms; credit BMKG as the source.

@@ -400,13 +400,13 @@ app = FastAPI(
     },
     openapi_tags=[
         {"name": "Meta", "description": "Health, dashboard, cache stats"},
-        {"name": "Weather", "description": "Forecast / present / legacy cuaca, area (df/v1 app API + open data)"},
-        {"name": "Airports", "description": "Cuaca bandara (METAR/TAF)"},
-        {"name": "Marine", "description": "Prakiraan maritim + gelombang"},
+        {"name": "Weather", "description": "Forecast / present / legacy weather, area (df/v1 app API + open data)"},
+        {"name": "Airports", "description": "Airport weather (METAR/TAF)"},
+        {"name": "Marine", "description": "Marine forecast + waves"},
         {"name": "Environment", "description": "Air quality (PM2.5), satellite imagery"},
         {"name": "Hazards", "description": "CB forecast, weather warnings, press releases, radar"},
-        {"name": "Earthquakes", "description": "Gempabumi & tsunami — web API (TEWS) + app CAP feeds"},
-        {"name": "Open Data", "description": "Prakiraan publik resmi + nowcast CAP (no token)"},
+        {"name": "Earthquakes", "description": "Earthquakes & tsunami — web API (TEWS) + app CAP feeds"},
+        {"name": "Open Data", "description": "Official public forecast + nowcast CAP (no token)"},
     ],
 )
 
